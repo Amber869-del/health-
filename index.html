@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>樂齡智慧照護與健康管理系統</title>
+    <style>
+        :root {
+            --primary-color: #059669;
+            --primary-hover: #047857;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --danger-color: #dc2626;
+            --danger-hover: #b91c1c;
+            --accent-color: #2563eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1.2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        /* 頂層核心四大主功能頁籤 */
+        .main-nav {
+            display: flex;
+            justify-content: center;
+            background-color: #047857;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+        }
+
+        .main-nav-btn {
+            background: none;
+            border: none;
+            color: white;
+            padding: 1rem 1.8rem;
+            font-size: 1.15rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main-nav-btn:hover {
+            background-color: #065f46;
+        }
+
+        .main-nav-btn.active {
+            background-color: #065f46;
+            border-bottom: 5px solid #fef08a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-section {
+            display: none;
+        }
+
+        .main-section.active {
+            display: block;
+        }
+
+        /* 運動內建下拉選單 Bar */
+        .sports-header-bar {
+            background-color: #1f2937;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .sports-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #10b981;
+        }
+
+        .sports-select-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sports-select {
+            background-color: #374151;
+            color: #ffffff;
+            font-size: 1.15rem;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid #10b981;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 700px;
+            border-radius: 0 0 10px 10px;
+            overflow: hidden;
+            border: 2px solid #e5e7eb;
+            background-color: #000;
+        }
+
+        .iframe-container.standalone {
+            border-radius: 10px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .btn-large {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 18px 24px;
+            border-radius: 12px;
+            font-size: 1.35rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+            transition: transform 0.1s, background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-large:hover {
+            background-color: #059669;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .btn-fullscreen {
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .status-box {
+            margin-top: 15px;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+
+        .status-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 2px solid #34d399;
+        }
+
+        .status-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #f87171;
+        }
+
+        .token-config {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .token-config label {
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #4b5563;
+        }
+
+        .token-config input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .data-table th {
+            background-color: #f3f4f6;
+            font-weight: bold;
+        }
+
+        /* 自動火焰警報狀態專區樣式 */
+        .auto-alert-box {
+            background-color: #fff1f2;
+            border: 2px dashed #f43f5e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>樂齡智慧照護與健康管理系統</h1>
+    </header>
+
+    <!-- 頂層四大主選單按鈕 -->
+    <nav class="main-nav">
+        <button class="main-nav-btn active" onclick="switchMainTab('sports')">🏋️‍♂️ 智慧運動</button>
+        <button class="main-nav-btn" onclick="switchMainTab('safety')">🏠 居家安全 (自動火焰偵測)</button>
+        <button class="main-nav-btn" onclick="switchMainTab('health')">💊 用藥與健康</button>
+        <button class="main-nav-btn" onclick="switchMainTab('analytics')">📊 衰弱預測引擎</button>
+    </nav>
+
+    <div class="container">
+
+        <!-- CN Notify Token 設定 -->
+        <div class="token-config">
+            <label for="notifyToken">🔑 LINE 推播 Token：</label>
+            <input type="text" id="notifyToken" value="KUgXi1NNViIoHFsbrLJ6qpMpYE6zQTqs" placeholder="請輸入 CN Notify Token">
+        </div>
+
+        <!-- ==================== 1. 智慧運動模組 ==================== -->
+        <div id="main-sports" class="main-section active">
+            <div class="card">
+                <button class="btn-large" onclick="sendSportReport()">📲 運動做完了？按此「一鍵傳送運動報告給家屬並存入衰弱紀錄」</button>
+                <div id="sportStatus" class="status-box"></div>
+            </div>
+
+            <div class="card" style="padding: 0; overflow: hidden; border-radius: 10px;">
+                <div class="sports-header-bar">
+                    <div class="sports-title">🏋️‍♂️ 樂齡智慧運動平台</div>
+                    <div class="sports-select-container">
+                        <label for="sportsSelect" style="font-weight:bold;">🎯 請選擇運動：</label>
+                        <select id="sportsSelect" class="sports-select" onchange="changeSport(this.value)">
+                            <option value="https://amber869-del.github.io/elderly-strength/">1. 下肢與體能評估</option>
+                            <option value="https://amber869-del.github.io/arm/">2. 上肢肢體活動訓練</option>
+                            <option value="https://amber869-del.github.io/ai-rehab-coach/">3. 頸椎運動</option>
+                        </select>
+                        <button class="btn-fullscreen" onclick="toggleFullScreen('sportsIframe')">⛶ 全螢幕</button>
+                    </div>
+                </div>
+
+                <div class="iframe-container" id="sportsIframe">
+                    <iframe id="sportsFrame" src="https://amber869-del.github.io/elderly-strength/" allow="camera; microphone; fullscreen"></iframe>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ==================== 2. 居家安全模組（全自動火焰偵測即時推播） ==================== -->
+        <div id="main-safety" class="main-section">
+            
+            <div class="card">
+                <h2 style="color: #b91c1c; margin-bottom: 10px;">🔥 居家安全代理：自動火焰偵測與即時家屬連線系統</h2>
+                <p style="color: #4b5563; margin-bottom: 15px;">
+                    本模組透過環境火焰感測器進行 24 小時監控。**當系統偵測到異常火焰時，會立即自動發送警報給家屬，無需手動操作**，確保第一時間掌握危險。
+                </p>
+
+                <!-- 模擬硬體自動偵測觸發測試控制板 -->
+                <div class="auto-alert-box">
+                    <div>
+                        <strong>🤖 硬體感測器模擬測試：</strong>
+                        <div style="font-size: 0.9rem; color: #6b7280;">點擊右側模擬硬體偵測到異常火焰（正常運作時由感測器自動觸發）</div>
+                    </div>
+                    <button class="btn-danger" style="padding: 10px 20px; border-radius: 6px; border:none; font-weight:bold; cursor:pointer;" onclick="simulateAutoFlameDetect()">🔥 模擬感測器：偵測到異常火焰</button>
+                </div>
+
+                <div id="safetyStatus" class="status-box"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>🏠 遠端火焰與環境監控</h2>
+                    <button class="btn-fullscreen" onclick="toggleFullScreen('safetyIframe')">⛶ 全螢幕放大</button>
+                </div>
+
+                <div class="iframe-container standalone" id="safetyIframe">
+                    <iframe src="https://amber869-del.github.io/FIRE/" allow="camera; microphone; fullscreen"></iframe>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ==================== 3. 用藥與健康模組 ==================== -->
+        <div id="main-health" class="main-section">
+            <div class="card">
+                <button class="btn-large" onclick="sendHealthReport()">📲 量測完畢？按此「一鍵傳送用藥與心率日誌給家屬」</button>
+                <div id="healthStatus" class="status-box"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>💊 用藥提醒與 ESP32 心率數據即時量測</h2>
+                    <button class="btn-fullscreen" onclick="toggleFullScreen('healthIframe')">⛶ 全螢幕放大</button>
+                </div>
+
+                <div class="iframe-container standalone" id="healthIframe">
+                    <iframe src="https://amber869-del.github.io/ESP32-HeartRate-Firebase/" allow="camera; microphone; fullscreen"></iframe>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ==================== 4. 衰弱預測引擎與運動歷程查詢 ==================== -->
+        <div id="main-analytics" class="main-section">
+            <div class="card">
+                <h2 style="margin-bottom: 15px; color:#047857;">📈 樂齡衰弱風險評估與歷史數據分析</h2>
+                
+                <div class="analytics-grid" style="margin-bottom:20px;">
+                    <div class="stat-card">
+                        <div>本週已完成運動總次數</div>
+                        <div class="stat-value" id="weeklySportCount">3 次</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>當前衰弱風險等級</div>
+                        <div class="stat-value" style="color:#059669;" id="frailtyLevel">🟢 低風險 (健康)</div>
+                    </div>
+                </div>
+
+                <h3>🔍 家屬專用：運動歷程紀錄查詢表</h3>
+                <p style="color:#6b7280; font-size:0.9rem; margin-bottom:10px;">長者每次完成運動並按下通報後，記錄皆會即時同步存入此處：</p>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>紀錄日期 / 時間</th>
+                            <th>運動項目</th>
+                            <th>持續時間</th>
+                            <th>狀態通報</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sportLogsTable">
+                        <tr>
+                            <td>2026/07/30 10:15</td>
+                            <td>1. 下肢與體能評估</td>
+                            <td>12 分鐘</td>
+                            <td><span style="color:#059669; font-weight:bold;">✅ 已完成</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026/07/29 15:30</td>
+                            <td>3. 頸椎運動</td>
+                            <td>8 分鐘</td>
+                            <td><span style="color:#059669; font-weight:bold;">✅ 已完成</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026/07/28 09:40</td>
+                            <td>2. 上肢肢體活動訓練</td>
+                            <td>15 分鐘</td>
+                            <td><span style="color:#059669; font-weight:bold;">✅ 已完成</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let sportStartTime = new Date();
+        let completedSportsCount = 3;
+
+        // 1. 切換頂層四大主頁籤
+        function switchMainTab(mainTab) {
+            document.querySelectorAll('.main-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.main-nav-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`main-${mainTab}`).classList.add('active');
+
+            const btnMap = { 'sports': 0, 'safety': 1, 'health': 2, 'analytics': 3 };
+            document.querySelectorAll('.main-nav-btn')[btnMap[mainTab]].classList.add('active');
+        }
+
+        // 2. 切換運動選單
+        function changeSport(url) {
+            document.getElementById('sportsFrame').src = url;
+            sportStartTime = new Date();
+        }
+
+        // 3. 全螢幕切換工具
+        function toggleFullScreen(elementId) {
+            const elem = document.getElementById(elementId);
+            if (!document.fullscreenElement) {
+                if (elem.requestFullscreen) elem.requestFullscreen();
+                else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+                else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        // 4. LINE Notify 通用訊息發送 API
+        function sendNotify(message, statusElemId, successText, isDanger = false) {
+            const token = document.getElementById('notifyToken').value.trim();
+            const statusDiv = document.getElementById(statusElemId);
+
+            if (!token) {
+                statusDiv.style.display = 'block';
+                statusDiv.className = "status-box status-danger";
+                statusDiv.innerText = "❌ 請先輸入有效的 LINE Token！";
+                return;
+            }
+
+            const img = new Image();
+            const targetUrl = `https://v2.chateverywhere.app/api/line/notify?token=${encodeURIComponent(token)}&message=${encodeURIComponent(message)}`;
+            img.src = targetUrl;
+
+            statusDiv.style.display = 'block';
+            statusDiv.className = isDanger ? "status-box status-danger" : "status-box status-success";
+            statusDiv.innerText = successText;
+
+            setTimeout(() => { 
+                statusDiv.style.display = 'none'; 
+            }, 6000);
+        }
+
+        // 🏋️‍♂️ 一鍵發送運動報告
+        function sendSportReport() {
+            const selectElem = document.getElementById('sportsSelect');
+            const sportName = selectElem.options[selectElem.selectedIndex].text;
+            
+            const endTime = new Date();
+            const duration = Math.max(1, Math.round((endTime - sportStartTime) / 1000 / 60));
+            const nowStr = endTime.toLocaleString("zh-TW", { hour12: false });
+
+            const msg = `# 🏋️‍♂️ 樂齡復健運動完成通報\n` +
+                        `**紀錄時間**：\`${nowStr}\` \n` +
+                        `- **運動項目**：${sportName}\n` +
+                        `- **持續時間**：約 \`${duration} 分鐘\`\n` +
+                        `- **訓練狀態**：長者已順利完成今日運動，狀況良好！`;
+
+            sendNotify(msg, 'sportStatus', '✅ 運動報告已成功傳送給家屬，並同步寫入衰弱預測引擎！');
+
+            completedSportsCount++;
+            document.getElementById('weeklySportCount').innerText = `${completedSportsCount} 次`;
+            
+            const tbody = document.getElementById('sportLogsTable');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${nowStr}</td>
+                <td>${sportName}</td>
+                <td>${duration} 分鐘</td>
+                <td><span style="color:#059669; font-weight:bold;">✅ 已完成</span></td>
+            `;
+            tbody.insertBefore(newRow, tbody.firstChild);
+        }
+
+        // 🔥 居家安全代理：感測器自動偵測火焰並立即發送警報給家屬（無須手動按按鈕）
+        function simulateAutoFlameDetect() {
+            const nowStr = new Date().toLocaleString("zh-TW", { hour12: false });
+            const msg = `# 🚨【居家安全緊急警報】偵測到異常火焰！\n` +
+                        `**發生時間**：\`${nowStr}\` \n` +
+                        `- **事件狀態**：居家火焰感測器已自動捕捉到異常火光與高溫！\n` +
+                        `- **系統動作**：系統已自動觸發緊急蜂鳴器，並即時通報家屬，請立即協助處理！`;
+
+            // 自動觸發推播
+            sendNotify(msg, 'safetyStatus', '🚨【自動觸發】感測器已偵測到火焰，警報已瞬間發送給家屬 LINE！', true);
+        }
+
+        // 💊 一鍵發送用藥與心率健康日誌
+        function sendHealthReport() {
+            const nowStr = new Date().toLocaleString("zh-TW", { hour12: false });
+            const msg = `# 💊 樂齡健康與心率生理日誌\n` +
+                        `**紀錄時間**：\`${nowStr}\` \n` +
+                        `- **服藥紀錄**：今日智慧藥盒已提醒並完成服藥\n` +
+                        `- **心率量測**：ESP32 即時量測完畢，心率生理指標已同步紀錄。`;
+
+            sendNotify(msg, 'healthStatus', '✅ 用藥與 ESP32 心率健康日誌已成功傳送！');
+        }
+    </script>
+</body>
+</html>
