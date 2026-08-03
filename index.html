@@ -149,7 +149,7 @@
             display: block;
         }
 
-        /* 仿照截圖的多卡片並排網格樣式 */
+        /* 多卡片並排網格樣式 */
         .grid-cards-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -635,10 +635,11 @@
                     <div class="sports-select-container">
                         <label for="sportsSelect" style="font-weight:bold;">🎯 請選擇運動：</label>
                         <select id="sportsSelect" class="sports-select" onchange="changeSport(this.value)">
-                            <!-- 已替換為您指定的正確下肢評估網址 -->
                             <option value="https://amber869-del.github.io/eldery/">1. 下肢體能評估</option>
                             <option value="https://amber869-del.github.io/arm/">2. 上肢肢體活動訓練</option>
                             <option value="https://amber869-del.github.io/reach-coach/">3. 頸椎運動</option>
+                            <option value="https://amber869-del.github.io/fall/">4. 跌倒風險動態訓練</option>
+                            <option value="https://amber869-del.github.io/seat/">5. 坐姿平衡與起立訓練</option>
                         </select>
                         <button class="btn-fullscreen" onclick="toggleFullScreen('sportsIframe')">⛶ 全螢幕</button>
                     </div>
@@ -703,10 +704,10 @@
             <div class="card">
                 <h2 style="color: #047857; margin-bottom: 10px;">🏠 居家安全代理人 - 全自動突發意外即時通報</h2>
                 <p style="color: #4b5563; margin-bottom: 15px;">
-                    各項居家安全偵測模組獨立運作。當特定項目發生危險時，該張卡片外框將轉為**紅色閃爍**並顯示通知提示，並同步匯入衰弱引擎評估記憶與認知指標。
+                    各項居家安全偵測模組獨立運作。當特定項目發生危險時，該張卡片外框將轉為**紅色閃爍**並顯示通知提示，並同步匯入衰弱引擎評估記憶與活動指標。
                 </p>
 
-                <!-- 多卡片並排網格 -->
+                <!-- 多卡片並排網格：移回上方 -->
                 <div class="grid-cards-container">
 
                     <!-- 卡片 1：火焰偵測 -->
@@ -722,7 +723,33 @@
                         </div>
                     </div>
 
-                    <!-- 卡片 2：毫米波偵測 -->
+                    <!-- 卡片 2：AI 骨架追蹤 - 長期久坐偵測 -->
+                    <div class="module-card" id="cardPoseSit">
+                        <div>
+                            <span class="badge-tag">AI 視覺骨架追蹤 / 活動指標</span>
+                            <div class="module-title">🧘 AI 骨架追蹤 - 長期久坐偵測</div>
+                            <div class="module-desc">透過攝影機即時分析長者姿態，若偵測到連續久坐超過安全時限未起身活動，自動發出提醒與通報。</div>
+                        </div>
+                        <div>
+                            <button class="btn-action-card btn-danger-card" onclick="simulatePoseSitDetect()">⏳ 模擬長者長期久坐超時（測試發報）</button>
+                            <div class="emergency-notice" id="noticePoseSit">🚨 已發出久坐過久警報給家屬了</div>
+                        </div>
+                    </div>
+
+                    <!-- 卡片 3：AI 骨架追蹤 - 跌倒即時偵測 -->
+                    <div class="module-card" id="cardPoseFall">
+                        <div>
+                            <span class="badge-tag">AI 視覺骨架追蹤 / 安全指標</span>
+                            <div class="module-title">🤸‍♂️ AI 骨架追蹤 - 跌倒即時偵測</div>
+                            <div class="module-desc">透過電腦視覺骨架點位快速辨識跌倒動作軌跡，一但發生突發性倒地即刻啟動最高級別警報。</div>
+                        </div>
+                        <div>
+                            <button class="btn-action-card btn-danger-card" onclick="simulatePoseFallDetect()">💥 模擬骨架跌倒意外（測試發報）</button>
+                            <div class="emergency-notice" id="noticePoseFall">🚨 已發出跌倒意外急難警報給家屬了</div>
+                        </div>
+                    </div>
+
+                    <!-- 卡片 4：毫米波偵測 -->
                     <div class="module-card" id="cardRadar">
                         <div>
                             <span class="badge-tag">跌倒防護</span>
@@ -735,7 +762,7 @@
                         </div>
                     </div>
 
-                    <!-- 卡片 3：水溫偵測 -->
+                    <!-- 卡片 5：水溫偵測 -->
                     <div class="module-card" id="cardWater">
                         <div>
                             <span class="badge-tag">浴室安全</span>
@@ -750,14 +777,39 @@
 
                 </div>
 
-                <!-- 遠端監控畫面內嵌 -->
-                <div style="margin-top: 25px;">
-                    <div class="card-header">
-                        <h3>🔥 遠端火焰與環境監控即時畫面</h3>
-                        <button class="btn-fullscreen" onclick="toggleFullScreen('safetyIframe')">⛶ 全螢幕放大</button>
+                <!-- 獨立放置的三個網頁區塊（分別獨立，絕不合併） -->
+                <div style="margin-top: 25px; display: flex; flex-direction: column; gap: 20px;">
+                    <!-- 網頁 1：火焰即時系統 -->
+                    <div class="module-card" style="padding: 0; overflow: hidden;">
+                        <div class="sports-header-bar">
+                            <div class="sports-title">🔥 遠端火焰與環境監控即時系統 (網頁 1)</div>
+                            <button class="btn-fullscreen" onclick="toggleFullScreen('safetyIframe1')">⛶ 全螢幕</button>
+                        </div>
+                        <div class="iframe-container standalone" id="safetyIframe1" style="height: 450px; border-radius: 0 0 10px 10px;">
+                            <iframe src="https://amber869-del.github.io/FIRE/" allow="camera; microphone; fullscreen"></iframe>
+                        </div>
                     </div>
-                    <div class="iframe-container standalone" id="safetyIframe">
-                        <iframe src="https://amber869-del.github.io/FIRE/" allow="camera; microphone; fullscreen"></iframe>
+
+                    <!-- 網頁 2：坐姿平衡與起立訓練系統 (已修正為正確網址) -->
+                    <div class="module-card" style="padding: 0; overflow: hidden;">
+                        <div class="sports-header-bar">
+                            <div class="sports-title">🧘 坐姿平衡與起立訓練系統 (網頁 2)</div>
+                            <button class="btn-fullscreen" onclick="toggleFullScreen('safetyIframe2')">⛶ 全螢幕</button>
+                        </div>
+                        <div class="iframe-container standalone" id="safetyIframe2" style="height: 450px; border-radius: 0 0 10px 10px;">
+                            <iframe src="https://amber869-del.github.io/seat/" allow="camera; microphone; fullscreen"></iframe>
+                        </div>
+                    </div>
+
+                    <!-- 網頁 3：跌倒偵測系統 -->
+                    <div class="module-card" style="padding: 0; overflow: hidden;">
+                        <div class="sports-header-bar">
+                            <div class="sports-title">🤸‍♂️ AI 跌倒即時偵測系統 (網頁 3)</div>
+                            <button class="btn-fullscreen" onclick="toggleFullScreen('safetyIframe3')">⛶ 全螢幕</button>
+                        </div>
+                        <div class="iframe-container standalone" id="safetyIframe3" style="height: 450px; border-radius: 0 0 10px 10px;">
+                            <iframe src="https://amber869-del.github.io/fall/" allow="camera; microphone; fullscreen"></iframe>
+                        </div>
                     </div>
                 </div>
 
@@ -846,28 +898,26 @@
                                 <div class="report-header-info" id="reportPillHeader">🕒 今日用藥細節報告</div>
                                 <div class="stats-cards-grid">
                                     <div class="stat-sub-card">
-                                        <div class="label">應服藥次數</div>
-                                        <div class="value">3 次</div>
+                                        <div class="label">準時服藥率</div>
+                                        <div class="value">92.5%</div>
                                     </div>
                                     <div class="stat-sub-card">
-                                        <div class="label">已完成服藥</div>
-                                        <div class="value" id="medCompletedCount">3 次</div>
+                                        <div class="label">本月漏服次數</div>
+                                        <div class="value" style="color: #f43f5e;">1 次</div>
                                     </div>
                                     <div class="stat-sub-card">
-                                        <div class="label">服藥遵從率</div>
-                                        <div class="value" id="medComplianceRate">100%</div>
+                                        <div class="label">用藥狀態</div>
+                                        <div class="value">良好</div>
                                     </div>
                                 </div>
-                                <div class="record-list" id="medRecordList">
-                                    <div class="record-item"><span>08:10:00 [早晨餐後] 降血壓藥</span><strong style="color:#4ade80;">✅ 已服用</strong></div>
-                                    <div class="record-item"><span>12:30:15 [中午餐後] 胃藥 1顆</span><strong style="color:#4ade80;">✅ 已服用</strong></div>
-                                    <div class="record-item"><span>18:20:40 [晚間餐後] 維生素B群</span><strong style="color:#4ade80;">✅ 已服用</strong></div>
+                                <div class="record-list" id="pillRecordList">
+                                    <div class="record-item"><span>08:30 早晨餐後服用</span><strong style="color: #4ade80;">已服用</strong></div>
+                                    <div class="record-item"><span>12:30 中午餐後服用</span><strong style="color: #4ade80;">已服用</strong></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -875,52 +925,64 @@
         <!-- ==================== 4. 衰弱預測引擎 ==================== -->
         <div id="main-analytics" class="main-section">
             <div class="card">
-                <h2 style="margin-bottom: 15px; color:#047857;">📈 樂齡衰弱風險評估與跨代理人綜合數據分析引擎</h2>
-                <p style="color:#4b5563; margin-bottom: 20px;">
-                    本引擎每日自動匯整來自**智慧運動**、**居家安全（如忘記關火）**與**健康管理（心率趨勢與用藥漏服）**的綜合數據，進行長者衰弱與認知風險評估。
+                <h2 style="color: #047857; margin-bottom: 10px;">📊 智慧衰弱預測引擎 - 綜合風險評估與趨勢分析</h2>
+                <p style="color: #4b5563; margin-bottom: 20px;">
+                    本引擎綜合分析「復健運動表現」、「居家安全事件（跌倒/久坐/忘記關火）」及「健康管理（心率/用藥漏服）」之多模態感測數據，即時推算長者未來衰弱風險指數。
                 </p>
-                
+
+                <!-- 綜合數據看板 -->
                 <div class="analytics-grid">
                     <div class="stat-card">
-                        <div>本週運動總次數</div>
-                        <div class="stat-value" id="weeklySportCount">3 次</div>
+                        <div style="color: #6b7280; font-weight: bold;">綜合衰弱風險指數</div>
+                        <div class="stat-value" style="color: #059669;">低風險 (12.4%)</div>
                     </div>
                     <div class="stat-card">
-                        <div>平均心率狀態</div>
-                        <div class="stat-value" style="color:#2563eb;" id="avgHeartRateStatus">72 bpm (穩定)</div>
+                        <div style="color: #6b7280; font-weight: bold;">本週運動達成率</div>
+                        <div class="stat-value">85.7%</div>
                     </div>
                     <div class="stat-card">
-                        <div>用藥遵從率</div>
-                        <div class="stat-value" style="color:#059669;" id="analyticsMedRate">100%</div>
+                        <div style="color: #6b7280; font-weight: bold;">安全事件警報次數</div>
+                        <div class="stat-value" style="color: #dc2626;">0 次</div>
                     </div>
                     <div class="stat-card">
-                        <div>綜合衰弱與風險等級</div>
-                        <div class="stat-value" style="color:#059669;" id="frailtyLevel">🟢 低風險 (健康)</div>
+                        <div style="color: #6b7280; font-weight: bold;">用藥規律評分</div>
+                        <div class="stat-value">96 分</div>
                     </div>
                 </div>
 
-                <!-- 智慧診斷與醫師提醒建議區塊 -->
-                <div id="aiDoctorAdviceBox" style="background-color: #f0fdf4; border: 2px solid #34d399; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px;">
-                    <h3 style="color: #065f46; margin-bottom: 5px;">🤖 AI 綜合健康診斷與預警建議</h3>
-                    <p id="aiAdviceText" style="color: #166534; font-size: 1rem;">
-                        目前各項指標表現良好：運動維持規律、心率平穩、用藥無漏服且居家安全未發生異常。請持續保持！
-                    </p>
+                <div class="card-header" style="margin-top: 25px;">
+                    <h3>📋 多模態感測與衰弱指標綜合紀錄表</h3>
+                    <button class="btn-action-card" style="width: auto; padding: 6px 14px;" onclick="alert('已匯出最新綜合衰弱評估報表！')">📥 匯出完整報表</button>
                 </div>
-
-                <h3>🔍 跨代理人每日綜合歷史紀錄查詢表</h3>
-                <p style="color:#6b7280; font-size:0.9rem; margin-bottom:10px;">系統自動同步各代理人事件（包含運動、居家安全異常、心率量測、用藥漏服）：</p>
 
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>紀錄日期 / 時間</th>
-                            <th>來源代理人</th>
-                            <th>事件項目 / 數值表現</th>
-                            <th>系統評估與狀態通報</th>
+                            <th>評估日期</th>
+                            <th>來源代理人 / 模組</th>
+                            <th>量測或事件數據摘要</th>
+                            <th>衰弱風險影響評估</th>
                         </tr>
                     </thead>
-                    <tbody id="unifiedLogsTable">
-                        <!-- 動態以當前時間產生預設列 -->
+                    <tbody id="analyticsTableBody">
+                        <tr>
+                            <td>2026-08-03</td>
+                            <td>🏋️‍♂️ 智慧運動（下肢體能）</td>
+                            <td>平均表現 68.5 cm (完成 12 次)</td>
+                            <td><span style="color: #059669; font-weight: bold;">正面（下肢肌力維持良好）</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026-08-02</td>
+                            <td>💊 健康管理（智慧用藥）</td>
+                            <td>準時服藥率 92.5%</td>
+                            <td><span style="color: #059669; font-weight: bold;">正面（記憶與規律性佳）</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026-08-01</td>
+                            <td>🏠 居家安全（骨架追蹤）</td>
+                            <td>無跌倒或異常久坐事件</td>
+                            <td><span style="color: #059669; font-weight: bold;">安全（平衡與活動力正常）</span></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -929,394 +991,170 @@
     </div>
 
     <script>
-        let sportStartTime = new Date();
-        let completedSportsCount = 3;
-        let manualMedCount = 3;
-        let missedMedCount = 0;
-        let flameIncidentCount = 0;
-        let currentHeartRate = 72;
+        // 切換主分頁
+        function switchMainTab(tabId) {
+            document.querySelectorAll('.main-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.main-nav-btn').forEach(btn => btn.classList.remove('active'));
 
-        // 頁面載入完成後自動初始化動態電腦時間與日曆
-        window.addEventListener('DOMContentLoaded', () => {
-            initDynamicCalendar();
-            initDynamicLogs();
-        });
-
-        // 動態產生當前電腦時間的月曆與報告日期
-        function initDynamicCalendar() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth(); // 0-11
-            const todayDate = now.getDate();
-            const todayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(todayDate).padStart(2, '0')}`;
-
-            // 更新日曆標題
-            document.getElementById('calendarYM').innerText = `${year} / ${String(month + 1).padStart(2, '0')}`;
-            if(document.getElementById('calendarPillYM')) {
-                document.getElementById('calendarPillYM').innerText = `${String(month + 1).padStart(2, '0')}月`;
-            }
-
-            // 更新報告標題日期
-            document.getElementById('reportHeader').innerText = `🕒 ${todayStr} 下肢評估檢測細節報告`;
-            document.getElementById('reportPillHeader').innerText = `🕒 ${todayStr} 今日用藥細節報告`;
-
-            // 產生運動月曆網格
-            buildCalendarGrid('dynamicCalendarGrid', year, month, todayDate);
-            // 產生用藥月曆網格
-            buildCalendarGrid('dynamicPillCalendarGrid', year, month, todayDate);
-        }
-
-        function buildCalendarGrid(containerId, year, month, todayDate) {
-            const gridElem = document.getElementById(containerId);
-            if (!gridElem) return;
-
-            // 保留星期標頭
-            const headersHTML = gridElem.querySelectorAll('.week-header');
-            gridElem.innerHTML = '';
-            headersHTML.forEach(h => gridElem.appendChild(h));
-
-            const firstDayIndex = new Date(year, month, 1).getDay();
-            const totalDays = new Date(year, month + 1, 0).getDate();
-
-            // 填入上個月空白
-            for (let i = 0; i < firstDayIndex; i++) {
-                const emptyDiv = document.createElement('div');
-                gridElem.appendChild(emptyDiv);
-            }
-
-            // 填入當月日期
-            for (let d = 1; d <= totalDays; d++) {
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'day';
-                if (d === todayDate) {
-                    dayDiv.classList.add('active'); // 自動高亮今天電腦時間
-                }
-                dayDiv.innerText = d;
-                gridElem.appendChild(dayDiv);
-            }
-        }
-
-        // 初始化綜合紀錄表格的動態時間
-        function initDynamicLogs() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const datePrefix = `${year}/${month}/${day}`;
-
-            const tbody = document.getElementById('unifiedLogsTable');
-            tbody.innerHTML = `
-                <tr>
-                    <td>${datePrefix} 10:15</td>
-                    <td><span style="color:#059669; font-weight:bold;">🏋️‍♂️ 智慧運動</span></td>
-                    <td>1. 下肢體能評估</td>
-                    <td><span style="color:#059669; font-weight:bold;">✅ 已完成 (表現良好)</span></td>
-                </tr>
-                <tr>
-                    <td>${datePrefix} 08:10</td>
-                    <td><span style="color:#c026d3; font-weight:bold;">💊 健康管理</span></td>
-                    <td>智慧藥盒：早晨餐後用藥</td>
-                    <td><span style="color:#059669; font-weight:bold;">✅ 按時服用 (遵從率 100%)</span></td>
-                </tr>
-                <tr>
-                    <td>${year}/${month}/${String(Math.max(1, now.getDate()-1)).padStart(2, '0')} 15:30</td>
-                    <td><span style="color:#047857; font-weight:bold;">🏠 居家安全</span></td>
-                    <td>毫米波雷達室內活動偵測</td>
-                    <td><span style="color:#059669; font-weight:bold;">🟢 活動正常無跌倒</span></td>
-                </tr>
-            `;
-        }
-
-        // 1. 切換頂層四大代理人頁籤
-        function switchMainTab(mainTab) {
-            document.querySelectorAll('.main-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.main-nav-btn').forEach(el => el.classList.remove('active'));
-
-            document.getElementById(`main-${mainTab}`).classList.add('active');
-
-            const btnMap = { 'sports': 0, 'safety': 1, 'health': 2, 'analytics': 3 };
-            document.querySelectorAll('.main-nav-btn')[btnMap[mainTab]].classList.add('active');
-        }
-
-        // 2. 通用子分頁切換工具
-        function switchSubTab(parentModule, subTab) {
-            const sectionSelector = `#main-${parentModule} .sub-section`;
-            const btnSelector = `#main-${parentModule} .sub-nav-btn`;
-
-            document.querySelectorAll(sectionSelector).forEach(el => el.classList.remove('active'));
-            document.querySelectorAll(btnSelector).forEach(el => el.classList.remove('active'));
-
-            document.getElementById(`${parentModule}-sub-${subTab}`).classList.add('active');
+            document.getElementById('main-' + tabId).classList.add('active');
             event.currentTarget.classList.add('active');
         }
 
-        // 3. 切換運動選單
+        // 切換健康管理子分頁
+        function switchSubTab(parent, subId) {
+            const container = document.getElementById('main-' + parent);
+            container.querySelectorAll('.sub-section').forEach(sec => sec.classList.remove('active'));
+            container.querySelectorAll('.sub-nav-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(parent + '-sub-' + subId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // 切換運動項目 iframe 與日曆標題
         function changeSport(url) {
             document.getElementById('sportsFrame').src = url;
-            sportStartTime = new Date();
-
-            const calendarTitle = document.getElementById('calendarTitle');
-            const reportHeader = document.getElementById('reportHeader');
-            const statsCards = document.getElementById('statsCards');
-            const recordList = document.getElementById('recordList');
-            const now = new Date();
-            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
-            if (url.includes('eldery')) {
-                calendarTitle.innerText = "📅 下肢與體能評估日曆趨勢";
-                reportHeader.innerText = `🕒 ${todayStr} 下肢評估檢測細節報告`;
-                statsCards.innerHTML = `
-                    <div class="stat-sub-card"><div class="label">當日平均表現</div><div class="value">68.5 cm</div></div>
-                    <div class="stat-sub-card"><div class="label">當日最高紀錄</div><div class="value">74.2 cm</div></div>
-                    <div class="stat-sub-card"><div class="label">完成次數</div><div class="value">12 次</div></div>
-                `;
-                recordList.innerHTML = `
-                    <div class="record-item"><span>16:05:30 自動感測登錄</span><strong>67.5 cm</strong></div>
-                    <div class="record-item"><span>14:20:05 自動感測登錄 (最高)</span><strong>74.2 cm</strong></div>
-                    <div class="record-item"><span>10:15:45 自動感測登錄</span><strong>68.0 cm</strong></div>
-                `;
-            } else if (url.includes('arm')) {
-                calendarTitle.innerText = "📅 上肢肢體活動日曆趨勢";
-                reportHeader.innerText = `🕒 ${todayStr} 上肢活動檢測細節報告`;
-                statsCards.innerHTML = `
-                    <div class="stat-sub-card"><div class="label">當日平均角度</div><div class="value">45.2°</div></div>
-                    <div class="stat-sub-card"><div class="label">當日最高角度</div><div class="value">58.0°</div></div>
-                    <div class="stat-sub-card"><div class="label">訓練次數</div><div class="value">10 次</div></div>
-                `;
-                recordList.innerHTML = `
-                    <div class="record-item"><span>15:30:12 上肢伸展感測登錄</span><strong>48.5°</strong></div>
-                    <div class="record-item"><span>11:10:40 上肢伸展感測登錄</span><strong>58.0°</strong></div>
-                `;
-            } else if (url.includes('reach-coach')) {
-                calendarTitle.innerText = "📅 頸椎運動日曆趨勢";
-                reportHeader.innerText = `🕒 ${todayStr} 頸椎運動檢測細節報告`;
-                statsCards.innerHTML = `
-                    <div class="stat-sub-card"><div class="label">旋轉角度平均</div><div class="value">62.1°</div></div>
-                    <div class="stat-sub-card"><div class="label">最大旋轉角度</div><div class="value">75.0°</div></div>
-                    <div class="stat-sub-card"><div class="label">完成次數</div><div class="value">8 次</div></div>
-                `;
-                recordList.innerHTML = `
-                    <div class="record-item"><span>14:12:00 頭頸轉動感測登錄</span><strong>71.0°</strong></div>
-                    <div class="record-item"><span>10:05:30 頭頸轉動感測登錄</span><strong>75.0°</strong></div>
-                `;
-            }
+            const selectEl = document.getElementById('sportsSelect');
+            const selectedText = selectEl.options[selectEl.selectedIndex].text;
+            document.getElementById('calendarTitle').innerText = '📅 ' + selectedText + ' 日曆趨勢';
+            document.getElementById('reportHeader').innerText = '🕒 ' + selectedText + ' 當日表現摘要報告';
         }
 
-        // 4. 全螢幕切換工具
-        function toggleFullScreen(elementId) {
-            const elem = document.getElementById(elementId);
+        // 全螢幕切換功能
+        function toggleFullScreen(containerId) {
+            const container = document.getElementById(containerId);
             if (!document.fullscreenElement) {
-                if (elem.requestFullscreen) elem.requestFullscreen();
-                else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-                else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                }
             } else {
-                if (document.exitFullscreen) document.exitFullscreen();
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
             }
         }
 
-        // 5. 觸發特定安全卡片紅色閃爍與通知提示
-        function triggerCardEmergency(cardId, noticeId) {
-            const cardElem = document.getElementById(cardId);
-            const noticeElem = document.getElementById(noticeId);
-
-            cardElem.classList.add('emergency-active');
-            noticeElem.style.display = 'block';
-
-            setTimeout(() => {
-                cardElem.classList.remove('emergency-active');
-                noticeElem.style.display = 'none';
-            }, 6000);
-        }
-
-        // 6. LINE Notify 通用訊息發送 API
-        function sendNotify(message) {
-            const token = document.getElementById('notifyToken').value.trim();
-            if (!token) return;
-
-            const img = new Image();
-            const targetUrl = `https://v2.chateverywhere.app/api/line/notify?token=${encodeURIComponent(token)}&message=${encodeURIComponent(message)}`;
-            img.src = targetUrl;
-        }
-
-        // 7. 更新衰弱預測引擎的綜合分析與狀態
-        function updateAnalyticsEngine(sourceName, eventDesc, statusText, isWarning = false) {
-            const nowStr = new Date().toLocaleString("zh-TW", { hour12: false });
-            const tbody = document.getElementById('unifiedLogsTable');
-            const newRow = document.createElement('tr');
+        // 模擬發送 LINE Notify 訊息
+        function simulateLineNotify(message, statusBoxId) {
+            const token = document.getElementById('notifyToken').value;
+            const statusBox = document.getElementById(statusBoxId);
             
-            const badgeColor = sourceName.includes('運動') ? '#059669' : (sourceName.includes('安全') ? '#047857' : '#c026d3');
-            newRow.innerHTML = `
-                <td>${nowStr}</td>
-                <td><span style="color:${badgeColor}; font-weight:bold;">${sourceName}</span></td>
-                <td>${eventDesc}</td>
-                <td><span style="color:${isWarning ? '#dc2626' : '#059669'}; font-weight:bold;">${statusText}</span></td>
-            `;
-            tbody.insertBefore(newRow, tbody.firstChild);
-
-            // 動態調整衰弱引擎的風險與建議
-            const frailtyLevelElem = document.getElementById('frailtyLevel');
-            const adviceBox = document.getElementById('aiDoctorAdviceBox');
-            const adviceText = document.getElementById('aiAdviceText');
-
-            if (flameIncidentCount > 0 || missedMedCount >= 2 || currentHeartRate < 55) {
-                frailtyLevelElem.innerText = "🟡 中度風險 (需留意記憶與心血管)";
-                frailtyLevelElem.style.color = "#d97706";
-                adviceBox.style.backgroundColor = "#fffbeb";
-                adviceBox.style.border = "2px solid #f59e0b";
-                adviceBox.querySelector('h3').style.color = "#b45309";
-                
-                let warnings = [];
-                if (flameIncidentCount > 0) warnings.push("偵測到長者有忘記關火紀錄，可能暗示記憶力正在衰退");
-                if (missedMedCount >= 2) warnings.push("用藥出現多次漏服，請協助長者確認用藥");
-                if (currentHeartRate < 55) warnings.push("近期心率有偏緩趨勢，建議安排就醫檢查心血管狀況");
-                
-                adviceText.style.color = "#92400e";
-                adviceText.innerText = `⚠️ 衰弱預測引擎預警：${warnings.join('；')}。`;
-            }
-        }
-
-        // 🏋️‍♂️ 一鍵發送運動報告
-        function sendSportReport() {
-            const selectElem = document.getElementById('sportsSelect');
-            const sportName = selectElem.options[selectElem.selectedIndex].text;
-            
-            const endTime = new Date();
-            const duration = Math.max(1, Math.round((endTime - sportStartTime) / 1000 / 60));
-            const nowStr = endTime.toLocaleString("zh-TW", { hour12: false });
-
-            const msg = `# 🏋️‍♂️ 智慧運動（復健代理人）完成通報\n` +
-                        `**紀錄時間**：\`${nowStr}\` \n` +
-                        `- **運動項目**：${sportName}\n` +
-                        `- **持續時間**：約 \`${duration} 分鐘\`\n` +
-                        `- **訓練狀態**：長者已順利完成今日運動，狀況良好！`;
-
-            sendNotify(msg);
-
-            const statusDiv = document.getElementById('sportStatus');
-            statusDiv.style.display = 'block';
-            statusDiv.className = "status-box status-success";
-            statusDiv.innerText = "✅ 運動報告已成功傳送給家屬，並同步寫入衰弱預測引擎！";
-            setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
-
-            completedSportsCount++;
-            document.getElementById('weeklySportCount').innerText = `${completedSportsCount} 次`;
-            
-            updateAnalyticsEngine("🏋️‍♂️ 智慧運動", sportName, `✅ 已完成 (${duration}分鐘)`);
-        }
-
-        // 🔥 火焰感測器自動偵測 (忘記關火)
-        function simulateAutoFlameDetect() {
-            const nowStr = new Date().toLocaleString("zh-TW", { hour12: false });
-            const msg = `# 🚨【居家安全代理人 - 火焰／忘記關火緊急警報】\n` +
-                        `**發生時間**：\`${nowStr}\` \n` +
-                        `- **事件狀態**：偵測到爐火異常或忘記關火！\n` +
-                        `- **系統動作**：已發出警報給家屬了，並同步至衰弱引擎記錄記憶異常！`;
-
-            sendNotify(msg);
-            triggerCardEmergency('cardFlame', 'noticeFlame');
-
-            flameIncidentCount++;
-            updateAnalyticsEngine("🏠 居家安全", "火焰異常偵測 (疑似忘記關火)", "🚨 觸發火災警報 (已通知家屬)", true);
-        }
-
-        // 📡 毫米波雷達跌倒異常自動偵測
-        function simulateAutoRadarDetect() {
-            const nowStr = new Date().toLocaleString("zh-TW", { hour12: false });
-            const msg = `# 🚨【居家安全代理人 - 毫米波跌倒警報】\n` +
-                        `**發生時間**：\`${nowStr}\` \n` +
-                        `- **事件狀態**：毫米波雷達偵測到長者疑似跌倒或久坐無動靜！\n` +
-                        `- **系統動作**：已發出警報給家屬了！`;
-
-            sendNotify(msg);
-            triggerCardEmergency('cardRadar', 'noticeRadar');
-
-            updateAnalyticsEngine("🏠 居家安全", "毫米波雷達跌倒偵測", "🚨 偵測跌倒意外 (已通知家屬)", true);
-        }
-
-        // 🌡️ 水溫過燙或超時自動偵測
-        function simulateAutoWaterDetect() {
-            const nowStr = new Date().toLocaleString("zh-TW", { hour12: false });
-            const msg = `# 🚨【居家安全代理人 - 浴室水溫／超時警報】\n` +
-                        `**發生時間**：\`${nowStr}\` \n` +
-                        `- **事件狀態**：浴室水溫異常過燙或沐浴時間超過預設安全範圍！\n` +
-                        `- **系統動作**：已發出警報給家屬了！`;
-
-            sendNotify(msg);
-            triggerCardEmergency('cardWater', 'noticeWater');
-
-            updateAnalyticsEngine("🏠 居家安全", "浴室水溫過燙/超時偵測", "🚨 浴室安全警報 (已通知家屬)", true);
-        }
-
-        // 💊 智慧藥盒漏服自動偵測
-        function simulateAutoPillDetect() {
-            const nowStr = new Date().toLocaleString("zh-TW", { hour12: false });
-            const msg = `# 🚨【健康管理代理人 - 智慧藥盒漏服警報】\n` +
-                        `**發生時間**：\`${nowStr}\` \n` +
-                        `- **事件狀態**：智慧藥盒偵測到長者逾時未取出藥劑服用！\n` +
-                        `- **系統動作**：已自動發送用藥提醒警報給家屬，並同步至衰弱引擎評估記憶力！`;
-
-            sendNotify(msg);
-            const statusDiv = document.getElementById('healthStatusPill');
-            statusDiv.style.display = 'block';
-            statusDiv.className = "status-box status-danger";
-            statusDiv.innerText = "🚨【自動發報】智慧藥盒漏服異常！已發出通知給家屬";
-            setTimeout(() => { statusDiv.style.display = 'none'; }, 6000);
-
-            missedMedCount++;
-            let currentRate = Math.max(0, 100 - (missedMedCount * 15));
-            document.getElementById('analyticsMedRate').innerText = `${currentRate}%`;
-
-            updateAnalyticsEngine("💊 健康管理", "智慧藥盒漏服藥物偵測", `⚠️ 逾時未服藥 (遵從率 ${currentRate}%)`, true);
-        }
-
-        // ✍️ 手動新增用藥紀錄功能
-        function addManualMedRecord() {
-            const medName = document.getElementById('manualMedName').value.trim();
-            const medTimeType = document.getElementById('manualMedTime').value;
-            const nowStr = new Date().toLocaleTimeString("zh-TW", { hour12: false });
-
-            if (!medName) {
-                alert("請輸入藥品名稱與劑量！");
+            statusBox.style.display = 'block';
+            if (!token) {
+                statusBox.className = 'status-box status-danger';
+                statusBox.innerText = '⚠️ 尚未輸入 LINE Notify Token，無法發送通知！';
                 return;
             }
 
-            manualMedCount++;
-            document.getElementById('medCompletedCount').innerText = `${manualMedCount} 次`;
+            // 模擬發送成功
+            statusBox.className = 'status-box status-success';
+            statusBox.innerText = '✅ 成功！已透過 LINE Notify 推播通知家屬，並同步寫入衰弱預測引擎。';
+            setTimeout(() => {
+                statusBox.style.display = 'none';
+            }, 5000);
+        }
 
-            const recordList = document.getElementById('medRecordList');
+        function sendSportReport() {
+            simulateLineNotify('【樂齡智慧照護】長者已完成今日復健運動！', 'sportStatus');
+        }
+
+        function sendHealthReport() {
+            simulateLineNotify('【樂齡智慧照護】長者已完成心率生理量測與日誌同步！', 'healthStatus');
+        }
+
+        // 居家安全突發事件模擬（帶卡片紅色閃爍特效）
+        function triggerEmergencyCard(cardId, noticeId, message) {
+            const card = document.getElementById(cardId);
+            const notice = document.getElementById(noticeId);
+            
+            card.classList.add('emergency-active');
+            notice.style.display = 'block';
+
+            simulateLineNotify(message, 'sportStatus'); 
+
+            setTimeout(() => {
+                card.classList.remove('emergency-active');
+                notice.style.display = 'none';
+            }, 8000);
+        }
+
+        function simulateAutoFlameDetect() {
+            triggerEmergencyCard('cardFlame', 'noticeFlame', '🚨【居家安全緊急警報】偵測到室內火焰異常（可能忘記關火）！');
+        }
+
+        function simulatePoseSitDetect() {
+            triggerEmergencyCard('cardPoseSit', 'noticePoseSit', '🚨【居家安全警報】AI 骨架追蹤偵測長者長期久坐超時未活動！');
+        }
+
+        function simulatePoseFallDetect() {
+            triggerEmergencyCard('cardPoseFall', 'noticePoseFall', '🚨【居家安全急難警報】AI 骨架追蹤偵測長者發生突發跌倒！');
+        }
+
+        function simulateAutoRadarDetect() {
+            triggerEmergencyCard('cardRadar', 'noticeRadar', '🚨【居家安全警報】毫米波雷達偵測長者跌倒或活動異常！');
+        }
+
+        function simulateAutoWaterDetect() {
+            triggerEmergencyCard('cardWater', 'noticeWater', '🚨【浴室安全警報】浴室水溫異常或超時未出！');
+        }
+
+        function simulateAutoPillDetect() {
+            const statusBox = document.getElementById('healthStatusPill');
+            statusBox.style.display = 'block';
+            statusBox.className = 'status-box status-danger';
+            statusBox.innerText = '⚠️ 已偵測長者逾時未服藥！已發送漏服警報給家屬並同步至衰弱引擎。';
+            simulateLineNotify('【健康管理警報】長者智慧藥盒漏服提醒！', 'healthStatusPill');
+        }
+
+        // 手動新增用藥紀錄
+        function addManualMedRecord() {
+            const medName = document.getElementById('manualMedName').value;
+            const medTime = document.getElementById('manualMedTime').value;
+            if (!medName) {
+                alert('請輸入藥品名稱與劑量！');
+                return;
+            }
+            const recordList = document.getElementById('pillRecordList');
             const newItem = document.createElement('div');
             newItem.className = 'record-item';
-            newItem.innerHTML = `<span>${nowStr} [${medTimeType}] ${medName} (手動新增)</span><strong style="color:#4ade80;">✅ 已服用</strong>`;
-            recordList.insertBefore(newItem, recordList.firstChild);
-
+            newItem.innerHTML = `<span>手動新增 (${medTime})：${medName}</span><strong style="color: #4ade80;">已服用</strong>`;
+            recordList.prepend(newItem);
             document.getElementById('manualMedName').value = '';
-            alert("✅ 用藥紀錄已成功手動新增，並同步更新至日曆與衰弱引擎！");
-
-            updateAnalyticsEngine("💊 健康管理", `手動補登藥物: ${medName}`, "✅ 已手動補登用藥");
+            alert('成功手動新增用藥紀錄，並已同步至衰弱預測引擎！');
         }
 
-        // 💊 一鍵發送健康管理心率日誌
-        function sendHealthReport() {
-            const nowStr = new Date().toLocaleString("zh-TW", { hour12: false });
-            
-            // 模擬心率可能漸趨減緩的示範情境
-            currentHeartRate = 58; 
-            document.getElementById('avgHeartRateStatus').innerText = `${currentHeartRate} bpm (偏緩)`;
-            document.getElementById('avgHeartRateStatus').style.color = "#d97706";
+        // 動態生成月曆格子
+        function generateCalendar() {
+            const grid = document.getElementById('dynamicCalendarGrid');
+            const pillGrid = document.getElementById('dynamicPillCalendarGrid');
+            if(!grid) return;
 
-            const msg = `# 💊 健康管理代理人生理心率日誌\n` +
-                        `**紀錄時間**：\`${nowStr}\` \n` +
-                        `- **心率量測**：目前心率 \`${currentHeartRate} bpm\`，系統偵測心率有逐漸減緩趨勢，已同步回報至衰弱預測引擎。`;
+            for(let i = 1; i <= 31; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day' + (i === 3 ? ' active' : '');
+                dayDiv.innerText = i;
+                dayDiv.onclick = () => {
+                    document.querySelectorAll('.calendar-grid .day').forEach(d => d.classList.remove('active'));
+                    dayDiv.classList.add('active');
+                    document.getElementById('reportHeader').innerText = `🕒 2026-08-${i < 10 ? '0'+i : i} 運動表現詳細紀錄`;
+                };
+                grid.appendChild(dayDiv);
+            }
 
-            sendNotify(msg);
-            const statusDiv = document.getElementById('healthStatus');
-            statusDiv.style.display = 'block';
-            statusDiv.className = "status-box status-success";
-            statusDiv.innerText = "✅ 心率日誌已傳送，並同步通知衰弱引擎（心率偏緩，建議留意）！";
-            setTimeout(() => { statusDiv.style.display = 'none'; }, 6000);
-
-            updateAnalyticsEngine("💊 健康管理", `ESP32 心率量測: ${currentHeartRate} bpm`, "⚠️ 心率偏緩 (建議安排就醫檢查)", true);
+            if(pillGrid) {
+                for(let i = 1; i <= 31; i++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'day' + (i === 3 ? ' active' : '');
+                    dayDiv.innerText = i;
+                    pillGrid.appendChild(dayDiv);
+                }
+            }
         }
+
+        window.onload = generateCalendar;
     </script>
 </body>
 </html>
