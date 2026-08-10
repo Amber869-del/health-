@@ -826,7 +826,11 @@
         <!-- LINE Notify Token 設定 -->
         <div class="token-config">
             <label for="notifyToken">🔑 LINE 推播 Token：</label>
-            <input type="text" id="notifyToken" value="" placeholder="請輸入您自己的 LINE Notify Token">
+            <input type="password" id="notifyToken" value="" autocomplete="off" placeholder="請輸入您自己的 LINE Notify Token">
+            <button type="button" id="enableNotifyBtn" class="calendar-nav-btn" onclick="enableLineNotify()">啟用通知</button>
+            <button type="button" class="calendar-nav-btn" onclick="testLineNotify()">測試通知</button>
+            <span id="notifyConfigStatus" style="font-size:0.9rem;color:#6b7280;">尚未啟用</span>
+            <div id="notifyTestStatus" class="status-box" style="display:none; flex-basis:100%; margin-top:4px;"></div>
         </div>
 
         <!-- ==================== 1. 智慧運動（復健代理人） ==================== -->
@@ -1533,37 +1537,112 @@
             }
         }
 
-        // 模擬發送 LINE Notify 訊息
-        function simulateLineNotify(message, statusBoxId) {
-            const token = document.getElementById('notifyToken').value;
-            const statusBox = document.getElementById(statusBoxId);
-            
-            if (statusBox) {
-                statusBox.style.display = 'block';
-                if (!token) {
-                    statusBox.className = 'status-box status-danger';
-                    statusBox.innerText = '⚠️ 尚未輸入 LINE Notify Token，無法發送通知！';
-                    return;
-                }
+        let lineNotifyEnabled = false;
 
-                statusBox.className = 'status-box status-success';
-                statusBox.innerText = '✅ 成功！已透過 LINE Notify 推播通知家屬，並同步寫入衰弱預測引擎。';
-                setTimeout(() => {
-                    statusBox.style.display = 'none';
-                }, 5000);
+        function enableLineNotify() {
+            const tokenInput = document.getElementById('notifyToken');
+            const status = document.getElementById('notifyConfigStatus');
+            const token = tokenInput ? tokenInput.value.trim() : '';
+            if (!token) {
+                lineNotifyEnabled = false;
+                if (status) {
+                    status.style.color = '#b91c1c';
+                    status.innerText = '請先輸入家屬自己的 token';
+                }
+                return false;
             }
+            lineNotifyEnabled = true;
+            if (status) {
+                status.style.color = '#047857';
+                status.innerText = 'Token 已啟用（僅保留於本頁面）';
+            }
+            return true;
+        }
+
+        const CE_NOTIFY_ENDPOINT = 'https://v2.chateverywhere.app/api/line/notify';
+        const ceNotifyGetRequests = [];
+
+        function sendCeNotifyByBrowserGet(message, token) {
+            const url = `${CE_NOTIFY_ENDPOINT}?token=${encodeURIComponent(token)}&message=${encodeURIComponent(message)}`;
+            const requestImage = new Image();
+            requestImage.alt = '';
+            requestImage.style.display = 'none';
+            requestImage.onload = requestImage.onerror = () => requestImage.remove();
+            document.body.appendChild(requestImage);
+            requestImage.src = url;
+            ceNotifyGetRequests.push(requestImage);
+        }
+
+        function formatNotifyMessage(message) {
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            const titleMatch = message.match(/【([^】]+)】/);
+            const title = titleMatch ? titleMatch[1] : '照護系統通知';
+            const detail = message.replace(/【[^】]+】/, '').trim();
+            const urgent = /警報|異常|漏服|跌倒|火焰|超時/.test(message);
+            return `# ${urgent ? '🚨' : '📋'} 【${title}】\n\n**紀錄時間**：\`${timestamp}\`\n\n- **事件內容**：${detail}\n- **系統動作**：已即時通知家屬，請查看 CE Notify。`;
+        }
+
+        async function simulateLineNotify(message, statusBoxId) {
+            const token = document.getElementById('notifyToken').value.trim();
+            const formattedMessage = formatNotifyMessage(message);
+            const statusBox = document.getElementById(statusBoxId);
+            if (!statusBox) return;
+            statusBox.style.display = 'block';
+            if (!token || !lineNotifyEnabled) {
+                statusBox.className = 'status-box status-danger';
+                statusBox.innerText = '⚠️ 尚未輸入並啟用家屬自己的 CE Notify Token！';
+                return;
+            }
+
+            statusBox.className = 'status-box';
+            statusBox.style.backgroundColor = '#fef3c7';
+            statusBox.style.color = '#92400e';
+            statusBox.innerText = '⏳ 正在連線 CE Notify…';
+            try {
+                const response = await fetch(CE_NOTIFY_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: formattedMessage, markdown: true })
+                });
+                const responseText = await response.text();
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}${responseText ? `：${responseText.slice(0, 180)}` : ''}`);
+                }
+                statusBox.className = 'status-box status-success';
+                statusBox.style.backgroundColor = '';
+                statusBox.style.color = '';
+                statusBox.innerText = '✅ CE Notify 已接受通知請求，請查看家屬 LINE。';
+            } catch (error) {
+                console.error('CE Notify 發送失敗：', error);
+                // CE Notify 的 POST 可能被瀏覽器 CORS 擋住；依其瀏覽器 GET 用法改用圖片請求發送。
+                sendCeNotifyByBrowserGet(formattedMessage, token);
+                statusBox.className = 'status-box';
+                statusBox.style.backgroundColor = '#fef3c7';
+                statusBox.style.color = '#92400e';
+                statusBox.innerText = '⚠️ POST 被瀏覽器 CORS 擋住，已改用 CE Notify GET 請求；請查看家屬 LINE。';
+            }
+            setTimeout(() => { statusBox.style.display = 'none'; }, 8000);
+        }
+
+        function testLineNotify() {
+            if (!enableLineNotify()) return;
+            simulateLineNotify('CE Notify 測試成功：這是來自衰弱預測引擎的測試通知。', 'notifyTestStatus');
         }
 
         function sendSportReport() {
-            simulateLineNotify('【樂齡智慧照護】長者已完成今日復健運動！', 'sportStatus');
+            simulateLineNotify('【運動完成報告】\n- **運動項目**：下肢與體能評估\n- **持續時間**：約 4 分鐘\n- **訓練狀態**：長者已順利完成今日運動，狀況良好！', 'sportStatus');
         }
 
         function sendHealthReport() {
-            simulateLineNotify('【樂齡智慧照護】長者已完成心率生理量測與日誌同步！', 'healthStatus');
+            simulateLineNotify('【健康量測報告】\n- **量測項目**：心率與生理日誌\n- **量測狀態**：資料已完成記錄\n- **系統動作**：已同步至衰弱預測引擎。', 'healthStatus');
         }
 
         function sendBpSpo2Report() {
-            simulateLineNotify('【樂齡智慧照護】長者已完成血氧血壓二合一量測記錄！', 'bpSpo2Status');
+            simulateLineNotify('【血壓血氧量測報告】\n- **量測項目**：血壓與血氧\n- **量測狀態**：二合一量測已完成\n- **系統動作**：已同步至歷史日曆與衰弱預測引擎。', 'bpSpo2Status');
         }
 
         function triggerEmergencyCard(cardId, noticeId, message) {
@@ -1573,7 +1652,7 @@
             card.classList.add('emergency-active');
             notice.style.display = 'block';
 
-            simulateLineNotify(message, 'sportStatus'); 
+            simulateLineNotify(message, 'notifyTestStatus'); 
 
             setTimeout(() => {
                 card.classList.remove('emergency-active');
@@ -1622,6 +1701,7 @@
             newItem.innerHTML = `<span>手動新增 (${medTime})：${medName}</span><strong style="color: #4ade80;">已服用</strong>`;
             recordList.prepend(newItem);
             document.getElementById('manualMedName').value = '';
+            simulateLineNotify(`【健康管理通知】已新增用藥紀錄：${medName}，服用時間 ${medTime}。`, 'healthStatusPill');
             alert('成功手動新增用藥紀錄，並已同步至衰弱預測引擎！');
         }
 
@@ -1640,6 +1720,7 @@
             recordList.prepend(newItem);
             document.getElementById('manualBpVal').value = '';
             document.getElementById('manualSpo2Val').value = '';
+            simulateLineNotify(`【健康管理通知】已新增血壓血氧紀錄：血壓 ${bpVal}，血氧 ${spo2Val}。`, 'bpSpo2Status');
             alert('成功新增血氧血壓二合一紀錄，並已同步至歷史日曆與衰弱預測引擎！');
         }
 
@@ -1834,6 +1915,7 @@
 
                 foodItems.push(newItem);
                 localStorage.setItem('food_items_v3', JSON.stringify(foodItems));
+                simulateLineNotify(`【食品管理通知】已新增食品「${name}」，有效期限為 ${date}。`, 'notifyTestStatus');
 
                 alert('✅ 儲存成功！商品已加入清單。');
                 renderFoodList();
@@ -2026,6 +2108,63 @@
                     historyGrid.appendChild(dayDiv);
                 }
             }
+        }
+
+        function syncCalendarsToToday() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const today = now.getDate();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthText = `${year} / ${String(month + 1).padStart(2, '0')}`;
+            const dateText = `${year}-${String(month + 1).padStart(2, '0')}-${String(today).padStart(2, '0')}`;
+
+            ['calendarYM', 'calendarBpYM'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = monthText;
+            });
+            const pillMonth = document.getElementById('calendarPillYM');
+            if (pillMonth) pillMonth.innerText = `${String(month + 1).padStart(2, '0')}月`;
+
+            const configs = [
+                ['dynamicCalendarGrid', 'reportHeader', '運動表現詳細紀錄'],
+                ['dynamicPillCalendarGrid', 'reportPillHeader', '今日用藥細節報告'],
+                ['dynamicBpCalendarGrid', 'reportBpHeader', '血氧血壓歷史量測摘要'],
+                ['night8CalendarGrid', 'night8ReportHeader', '晚上 8:00 自動日結報告'],
+                ['historyCalendarGrid', 'historyReportHeader', '歷史查詢紀錄：發生大小事細節']
+            ];
+
+            configs.forEach(([gridId, reportId, reportSuffix]) => {
+                const grid = document.getElementById(gridId);
+                if (!grid) return;
+                Array.from(grid.children).forEach(child => {
+                    if (!child.classList.contains('week-header')) child.remove();
+                });
+                for (let i = 0; i < new Date(year, month, 1).getDay(); i++) {
+                    grid.appendChild(document.createElement('div'));
+                }
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const cell = document.createElement('div');
+                    const isFuture = day > today;
+                    cell.className = `day${isFuture ? ' disabled' : (day === today ? ' active' : '')}`;
+                    cell.innerText = day;
+                    if (!isFuture) {
+                        cell.onclick = () => {
+                            grid.querySelectorAll('.day').forEach(d => d.classList.remove('active'));
+                            cell.classList.add('active');
+                            const selected = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                            const report = document.getElementById(reportId);
+                            if (report) report.innerText = `🕒 ${selected} ${reportSuffix}`;
+                        };
+                    }
+                    grid.appendChild(cell);
+                }
+            });
+
+            ['reportHeader', 'reportBpHeader', 'night8ReportHeader'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = `🕒 ${dateText} ${el.innerText.replace(/^🕒\s+.*?\s+(?=運動|血氧|晚上)/, '')}`;
+            });
         }
 
         let fallDetector = null;
@@ -2234,7 +2373,7 @@
 
             speakTextIndex6(`藥品已確認。請喝水服用 ${index6VerifiedDrug.name}。`);
             alert(`已成功解鎖！請指示長者喝水並服用 ${index6VerifiedDrug.name}。`);
-            simulateLineNotify(`【高精度服藥通知】長者已成功核對並解鎖服用 ${index6VerifiedDrug.name}！`, 'sportStatus');
+            simulateLineNotify(`【高精度服藥通知】長者已成功核對並解鎖服用 ${index6VerifiedDrug.name}！`, 'healthStatus');
         }
 
         function resetIndex6Scan() {
@@ -2249,6 +2388,7 @@
 
         window.onload = () => {
             generateCalendar();
+            syncCalendarsToToday();
             initWebcam();
             startFoodCamera();
             renderFoodList();
