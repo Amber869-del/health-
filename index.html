@@ -1109,13 +1109,14 @@
             <div class="card">
                 <h2 style="color: #047857; margin-bottom: 10px;">💊 健康管理代理人 - 生理監測與智慧用藥</h2>
                 <p style="color: #4b5563; margin-bottom: 15px;">
-                    透過下方大型膠囊分頁按鈕切換檢視心率量測、智慧用藥日曆，或是直接使用下方新增之「安心居高精度防呆服藥系統」。
+                    透過下方大型膠囊分頁按鈕切換檢視心率量測、智慧用藥日曆、安心居高精度防呆服藥系統，以及新增之「血氧血壓二合一記錄」與雙日曆功能。
                 </p>
 
                 <div class="sub-nav">
                     <button class="sub-nav-btn active" onclick="switchSubTab('health', 'heartrate')">❤️ 心率偵測</button>
                     <button class="sub-nav-btn" onclick="switchSubTab('health', 'pillbox')">💊 智慧用藥與日曆管理</button>
                     <button class="sub-nav-btn" onclick="switchSubTab('health', 'index6')">✨ 安心居高精度服藥</button>
+                    <button class="sub-nav-btn" onclick="switchSubTab('health', 'bpSpo2')">🩺 血氧血壓二合一記錄</button>
                 </div>
 
                 <!-- 子區塊 1：心率偵測 -->
@@ -1228,6 +1229,67 @@
                         <div style="border-top: 2px dashed #bdc3c7; padding-top: 16px; margin-top: 16px;">
                             <h3>💧 飲水與服藥確認區</h3>
                             <button id="waterMedicineBtn" disabled style="background-color: #95a5a6; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 6px; cursor: not-allowed; font-weight: bold; width: 100%; margin-top: 10px;">🔒 請先完成上方藥品辨識以解鎖</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 子區塊 4：血氧血壓二合一記錄 (新增子分頁與雙日曆功能) -->
+                <div id="health-sub-bpSpo2" class="sub-section">
+                    <div class="card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 15px;">
+                        <button class="btn-large" style="margin-bottom: 15px; background-color: #0284c7;" onclick="sendBpSpo2Report()">📲 量測完畢？按此「一鍵傳送血氧血壓二合一記錄給家屬並同步衰弱引擎」</button>
+                        <div id="bpSpo2Status" class="status-box"></div>
+                    </div>
+
+                    <!-- 手動新增血氧血壓資料介面 -->
+                    <div class="manual-input-box">
+                        <strong style="color: #38bdf8; width: 100%;">✍️ 手動新增血氧與血壓測量紀錄：</strong>
+                        <input type="text" id="manualBpVal" placeholder="血壓值 (例: 120/80 mmHg)" style="flex: 1.2;">
+                        <input type="text" id="manualSpo2Val" placeholder="血氧值 (例: 98 %)" style="flex: 1;">
+                        <button onclick="addManualBpSpo2Record()" style="background-color: #0284c7;">➕ 記錄並同步日曆</button>
+                    </div>
+
+                    <!-- 雙日曆與歷史資料調閱介面 -->
+                    <div class="platform-calendar-box" style="margin-top: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #334155; padding-bottom: 0.8rem; flex-wrap: wrap; gap: 8px;">
+                            <h3 style="color: #38bdf8; margin: 0; font-size: 1.2rem;">📅 家屬專用：血氧血壓雙日曆與歷史紀錄調閱</h3>
+                            <span style="font-size: 0.85rem; color: #94a3b8;">（支援今日資料檢視與日曆點選調閱過往歷史）</span>
+                        </div>
+
+                        <div class="calendar-dashboard">
+                            <div class="calendar-section">
+                                <div class="calendar-title">
+                                    <span id="calendarBpTitle">📅 血氧血壓歷史日曆</span>
+                                    <div>
+                                        <button class="calendar-nav-btn">&lt;</button>
+                                        <span id="calendarBpYM" style="margin: 0 0.5rem; font-weight: bold;">2026 / 08</span>
+                                        <button class="calendar-nav-btn">&gt;</button>
+                                    </div>
+                                </div>
+                                <div class="calendar-grid" id="dynamicBpCalendarGrid">
+                                    <div class="week-header">日</div><div class="week-header">一</div><div class="week-header">二</div><div class="week-header">三</div><div class="week-header">四</div><div class="week-header">五</div><div class="week-header">六</div>
+                                </div>
+                            </div>
+                            <div class="report-section">
+                                <div class="report-header-info" id="reportBpHeader">🕒 2026-08-07 血氧血壓當日量測摘要</div>
+                                <div class="stats-cards-grid">
+                                    <div class="stat-sub-card">
+                                        <div class="label">平均收縮壓 / 舒張壓</div>
+                                        <div class="value" id="bpStatAvg" style="color: #38bdf8;">122 / 78 mmHg</div>
+                                    </div>
+                                    <div class="stat-sub-card">
+                                        <div class="label">平均血氧濃度</div>
+                                        <div class="value" id="spo2StatAvg">97.8 %</div>
+                                    </div>
+                                    <div class="stat-sub-card">
+                                        <div class="label">生理狀態評估</div>
+                                        <div class="value" style="color: #4ade80;">穩定正常</div>
+                                    </div>
+                                </div>
+                                <div class="record-list" id="bpRecordList">
+                                    <div class="record-item"><span>08:15 早晨量測</span><strong>血壓: 120/78 mmHg | 血氧: 98%</strong></div>
+                                    <div class="record-item"><span>14:30 午后追蹤</span><strong>血壓: 124/80 mmHg | 血氧: 97%</strong></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1381,6 +1443,12 @@
                             </tr>
                             <tr>
                                 <td>2026-08-07</td>
+                                <td>💊 健康管理（血氧血壓二合一）</td>
+                                <td>收縮壓 120 / 舒張壓 78 mmHg，血氧 98%</td>
+                                <td><span style="color: #059669; font-weight: bold;">正面（循環與呼吸系統穩定）</span></td>
+                            </tr>
+                            <tr>
+                                <td>2026-08-07</td>
                                 <td>💊 健康管理（安心居高精度服藥）</td>
                                 <td>安心居 AI 辨識與吞服確認完成</td>
                                 <td><span style="color: #059669; font-weight: bold;">正面（用藥零誤判與規律性極佳）</span></td>
@@ -1390,12 +1458,6 @@
                                 <td>💊 健康管理（智慧用藥）</td>
                                 <td>準時服藥率 92.5%</td>
                                 <td><span style="color: #059669; font-weight: bold;">正面（記憶與規律性佳）</span></td>
-                            </tr>
-                            <tr>
-                                <td>2026-08-05</td>
-                                <td>🏠 居家安全（骨架追蹤）</td>
-                                <td>無跌倒或異常久坐事件</td>
-                                <td><span style="color: #059669; font-weight: bold;">安全（平衡與活動力正常）</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -1500,6 +1562,10 @@
             simulateLineNotify('【樂齡智慧照護】長者已完成心率生理量測與日誌同步！', 'healthStatus');
         }
 
+        function sendBpSpo2Report() {
+            simulateLineNotify('【樂齡智慧照護】長者已完成血氧血壓二合一量測記錄！', 'bpSpo2Status');
+        }
+
         function triggerEmergencyCard(cardId, noticeId, message) {
             const card = document.getElementById(cardId);
             const notice = document.getElementById(noticeId);
@@ -1557,6 +1623,24 @@
             recordList.prepend(newItem);
             document.getElementById('manualMedName').value = '';
             alert('成功手動新增用藥紀錄，並已同步至衰弱預測引擎！');
+        }
+
+        function addManualBpSpo2Record() {
+            const bpVal = document.getElementById('manualBpVal').value.trim();
+            const spo2Val = document.getElementById('manualSpo2Val').value.trim();
+            if (!bpVal || !spo2Val) {
+                alert('請完整輸入血壓與血氧數值！');
+                return;
+            }
+            const recordList = document.getElementById('bpRecordList');
+            const newItem = document.createElement('div');
+            newItem.className = 'record-item';
+            const nowTime = new Date().toTimeString().slice(0, 5);
+            newItem.innerHTML = `<span>${nowTime} 手動登錄</span><strong>血壓: ${bpVal} | 血氧: ${spo2Val}</strong>`;
+            recordList.prepend(newItem);
+            document.getElementById('manualBpVal').value = '';
+            document.getElementById('manualSpo2Val').value = '';
+            alert('成功新增血氧血壓二合一紀錄，並已同步至歷史日曆與衰弱預測引擎！');
         }
 
         // ------------------ 食品有效期限智能小幫手邏輯 ------------------
@@ -1831,6 +1915,7 @@
             const pillGrid = document.getElementById('dynamicPillCalendarGrid');
             const night8Grid = document.getElementById('night8CalendarGrid');
             const historyGrid = document.getElementById('historyCalendarGrid');
+            const bpGrid = document.getElementById('dynamicBpCalendarGrid');
             if(!grid) return;
 
             const currentDay = 7;
@@ -1866,6 +1951,32 @@
                         dayDiv.innerText = i;
                     }
                     pillGrid.appendChild(dayDiv);
+                }
+            }
+
+            // 血氧血壓雙日曆初始化
+            if(bpGrid) {
+                for(let i = 1; i <= 31; i++) {
+                    const dayDiv = document.createElement('div');
+                    if (i > currentDay) {
+                        dayDiv.className = 'day disabled';
+                        dayDiv.innerText = i;
+                        dayDiv.title = '尚未發生的未來日期';
+                    } else {
+                        dayDiv.className = 'day' + (i === currentDay ? ' active' : '');
+                        dayDiv.innerText = i;
+                        dayDiv.onclick = () => {
+                            document.querySelectorAll('#dynamicBpCalendarGrid .day').forEach(d => {
+                                if(!d.classList.contains('disabled')) d.classList.remove('active');
+                            });
+                            dayDiv.classList.add('active');
+                            const dateStr = `2026-08-${i < 10 ? '0'+i : i}`;
+                            document.getElementById('reportBpHeader').innerText = `🕒 ${dateStr} 血氧血壓歷史量測摘要`;
+                            document.getElementById('bpStatAvg').innerText = `${120 + (i % 3)} / ${76 + (i % 2)} mmHg`;
+                            document.getElementById('spo2StatAvg').innerText = `${97 + (i % 2)}.5 %`;
+                        };
+                    }
+                    bpGrid.appendChild(dayDiv);
                 }
             }
 
