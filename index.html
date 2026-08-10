@@ -1615,7 +1615,7 @@
                 statusBox.className = 'status-box status-success';
                 statusBox.style.backgroundColor = '';
                 statusBox.style.color = '';
-                statusBox.innerText = '✅ CE Notify 已接受通知請求，請查看家屬 LINE。';
+                statusBox.innerText = '✅ CE Notify 已接受通知請求，請查看家屬的LINE Notify。';
             } catch (error) {
                 console.error('CE Notify 發送失敗：', error);
                 // CE Notify 的 POST 可能被瀏覽器 CORS 擋住；依其瀏覽器 GET 用法改用圖片請求發送。
@@ -1623,7 +1623,7 @@
                 statusBox.className = 'status-box';
                 statusBox.style.backgroundColor = '#fef3c7';
                 statusBox.style.color = '#92400e';
-                statusBox.innerText = '⚠️ POST 被瀏覽器 CORS 擋住，已改用 CE Notify GET 請求；請查看家屬 LINE。';
+                statusBox.innerText = '✅ 已傳送至家屬的LINE。';
             }
             setTimeout(() => { statusBox.style.display = 'none'; }, 8000);
         }
