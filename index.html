@@ -565,6 +565,91 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* RWD：一般電腦視窗縮放 */
+        @media (max-width: 1200px) {
+            .container { width: calc(100% - 32px); }
+            .main-nav-btn {
+                min-width: 0;
+                padding-left: 1rem;
+                padding-right: 1rem;
+                font-size: 1rem;
+            }
+            .sub-nav-btn { padding-left: 16px; padding-right: 16px; }
+        }
+
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .main-nav {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .main-nav-btn { width: 100%; min-width: 0; }
+            .calendar-dashboard { grid-template-columns: 1fr; }
+            .grid-cards-container { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .sports-header-bar { align-items: stretch; }
+            .sports-select-container, .sports-select { max-width: 100%; }
+            .iframe-container, .iframe-container.standalone { height: 520px !important; }
+        }
+
+        /* RWD：手機與窄螢幕版面 */
+        @media (max-width: 768px) {
+            body { overflow-x: hidden; }
+            header { padding: 0.85rem 0.75rem; }
+            header h1 { font-size: 1.35rem; line-height: 1.35; }
+            .main-nav {
+                position: static;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .main-nav-btn {
+                min-width: 0;
+                width: 100%;
+                padding: 0.8rem 0.35rem;
+                font-size: 0.95rem;
+                line-height: 1.25;
+                white-space: normal;
+            }
+            .container { width: 100%; margin: 12px auto; padding: 0 10px; }
+            .card, .platform-calendar-box { padding: 12px; border-radius: 9px; }
+            .token-config { align-items: stretch; padding: 10px; gap: 8px; }
+            .token-config label, .token-config input, .token-config button,
+            .token-config #notifyConfigStatus {
+                width: 100%; min-width: 0; flex: 1 1 100%;
+            }
+            .token-config button { min-height: 42px; }
+            .token-config #notifyTestStatus { width: 100%; flex-basis: 100%; }
+            .btn-large { min-height: 50px; padding: 12px 10px; font-size: 0.98rem; line-height: 1.4; }
+            .sub-nav { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 12px; padding-bottom: 10px; }
+            .sub-nav-btn { min-width: 0; width: 100%; padding: 10px 12px; font-size: 1rem; line-height: 1.35; }
+            .sports-header-bar { align-items: stretch; padding: 10px 12px; }
+            .sports-title { font-size: 1.05rem; }
+            .sports-select-container, .sports-select { width: 100%; }
+            .sports-select { font-size: 0.95rem; }
+            .iframe-container, .iframe-container.standalone { height: 420px !important; }
+            .grid-cards-container { grid-template-columns: 1fr; gap: 12px; }
+            .calendar-dashboard { grid-template-columns: 1fr; gap: 10px; padding: 10px; }
+            .calendar-section { padding: 10px; }
+            .calendar-title { align-items: flex-start; font-size: 0.95rem; }
+            .calendar-grid { gap: 2px; font-size: 0.8rem; }
+            .calendar-grid div { min-height: 34px; padding: 0.45rem 0; }
+            .calendar-grid .week-header { min-height: 24px; padding: 0.2rem 0; }
+            .manual-input-box { padding: 10px; }
+            .manual-input-box input, .manual-input-box select, .manual-input-box button {
+                flex-basis: 100%; width: 100%; min-width: 0;
+            }
+            .data-table { font-size: 0.85rem; }
+            video, canvas, img { max-width: 100%; }
+        }
+
+        @media (max-width: 480px) {
+            .main-nav-btn { font-size: 0.82rem; padding: 0.7rem 0.2rem; }
+            .container { padding: 0 6px; }
+            .card, .platform-calendar-box { padding: 9px; }
+            .calendar-grid { font-size: 0.73rem; }
+            .calendar-grid div { min-height: 30px; padding: 0.35rem 0; }
+            .report-header-info { font-size: 0.9rem; }
+        }
+
         .stat-sub-card {
             background: #1e293b;
             border: 1px solid #334155;
