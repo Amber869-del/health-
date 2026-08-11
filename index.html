@@ -1141,7 +1141,8 @@
                             </div>
 
                             <div id="camera-error" style="background: #fadbd8; color: #c0392b; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; text-align: center; font-weight: bold;">
-                                ⚠️ 無法存取相機！請確認瀏覽器是否已授權相機權限。
+                                <div id="camera-error-text">⚠️ 無法存取相機！請確認瀏覽器是否已授權相機權限。</div>
+                                <button type="button" onclick="startFoodCamera()" style="margin-top:10px;background:#c0392b;color:white;border:0;border-radius:6px;padding:8px 14px;font-weight:bold;cursor:pointer;">🔄 重新啟用相機</button>
                             </div>
 
                             <div class="video-box">
@@ -1641,6 +1642,7 @@
                 status.style.color = '#047857';
                 status.innerText = 'Token 已啟用（僅保留於本頁面）';
             }
+            if (typeof checkFoodExpiryAlerts === 'function') checkFoodExpiryAlerts();
             return true;
         }
 
@@ -1835,8 +1837,39 @@
         let frontImageData = null;
         let dateImageData = null;
         let foodItems = JSON.parse(localStorage.getItem('food_items_v3')) || [];
+        const FOOD_EXPIRY_ALERT_KEY = 'food_expiry_alert_sent_v1';
+
+        function checkFoodExpiryAlerts() {
+            if (!lineNotifyEnabled || !document.getElementById('notifyToken')?.value.trim()) return;
+            const sentAlerts = JSON.parse(localStorage.getItem(FOOD_EXPIRY_ALERT_KEY) || '{}');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let changed = false;
+
+            foodItems.forEach(item => {
+                const expiryDate = new Date(`${item.date}T00:00:00`);
+                const diffDays = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+                const alertId = `${item.id}_${item.date}`;
+                if (diffDays >= 0 && diffDays <= 7 && !sentAlerts[alertId]) {
+                    const remaining = diffDays === 0 ? '今天到期' : `剩餘 ${diffDays} 天`;
+                    simulateLineNotify(`【食品即將到期警報】\n- **食品名稱**：${item.name}\n- **有效期限**：${item.date}\n- **剩餘時間**：${remaining}\n- **系統動作**：請家屬查看食品並儘快食用或處理。`, 'notifyTestStatus');
+                    sentAlerts[alertId] = new Date().toISOString();
+                    changed = true;
+                }
+            });
+
+            if (changed) localStorage.setItem(FOOD_EXPIRY_ALERT_KEY, JSON.stringify(sentAlerts));
+        }
 
         async function startFoodCamera() {
+            const cameraErrorText = document.getElementById('camera-error-text');
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                if (cameraError) cameraError.style.display = 'block';
+                if (cameraErrorText) cameraErrorText.innerText = window.isSecureContext
+                    ? '⚠️ 此瀏覽器不支援相機功能。'
+                    : '⚠️ 相機需要 HTTPS 或 localhost 網址，請不要直接用 file:// 開啟 HTML。';
+                return;
+            }
             try {
                 if (foodVideo && !foodVideo.srcObject) {
                     const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -1848,6 +1881,9 @@
             } catch (err) {
                 console.error(err);
                 if(cameraError) cameraError.style.display = 'block';
+                if (cameraErrorText) cameraErrorText.innerText = err.name === 'NotAllowedError'
+                    ? '⚠️ 相機權限被拒絕，請按網址列的相機圖示並允許使用相機。'
+                    : '⚠️ 無法存取相機，請確認相機沒有被其他程式使用。';
                 try {
                     const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
                     foodVideo.srcObject = fallbackStream;
@@ -2028,6 +2064,10 @@
                 const diffTime = expDate - today;
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+                if (diffDays >= 0 && diffDays <= 7) {
+                    item.expiryNotice = '⚠️ 一週內到期';
+                }
+
                 let statusClass = '';
                 let statusText = `有效期限：${item.date} (剩餘 ${diffDays} 天)`;
 
@@ -2037,6 +2077,9 @@
                 } else if (diffDays <= 3) {
                     statusClass = 'warning';
                     statusText = `⚡ 快過期！剩餘 ${diffDays} 天 (${item.date})`;
+                } else if (diffDays <= 7) {
+                    statusClass = 'warning';
+                    statusText = `⚠️ 一週內到期！剩餘 ${diffDays} 天 (${item.date})`;
                 }
 
                 const li = document.createElement('li');
@@ -2046,11 +2089,26 @@
                         <h3>${item.name}</h3>
                         <p>${statusText}</p>
                     </div>
-                    <button class="delete-btn" onclick="deleteFoodItem(${item.id})">刪除</button>
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+                        <button type="button" onclick="sendFoodToFamily(${item.id})" style="background:#2563eb;color:white;border:0;border-radius:6px;padding:8px 10px;font-weight:bold;cursor:pointer;">📨 發送給家屬</button>
+                        <button class="delete-btn" onclick="deleteFoodItem(${item.id})">刪除</button>
+                    </div>
+                    <div id="foodNotifyStatus-${item.id}" class="status-box" style="display:none; flex-basis:100%; margin-top:8px;"></div>
                 `;
                 itemList.appendChild(li);
             });
         }
+
+        window.sendFoodToFamily = function(id) {
+            const item = foodItems.find(food => food.id === id);
+            if (!item) return;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const expiryDate = new Date(`${item.date}T00:00:00`);
+            const diffDays = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+            const remaining = diffDays < 0 ? '已過期' : (diffDays === 0 ? '今天到期' : `剩餘 ${diffDays} 天`);
+            simulateLineNotify(`【食品保存通知】\n- **食品名稱**：${item.name}\n- **有效期限**：${item.date}\n- **目前狀態**：${remaining}\n- **系統動作**：家屬已收到食品保存提醒，請查看並儘快處理。`, `foodNotifyStatus-${id}`);
+        };
 
         window.deleteFoodItem = function(id) {
             if (confirm('確定要刪除這個商品嗎？')) {
